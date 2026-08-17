@@ -1,0 +1,48 @@
+name: Release Summer CLI
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tags like v1.0.0
+  workflow_dispatch: # Allow manual trigger
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Run Tests
+        run: go test -v ./...
+
+      - name: Build for Linux (amd64)
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-w -s" -o summer-linux-amd64
+
+      - name: Build for Linux (arm64)
+        run: CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -ldflags="-w -s" -o summer-linux-arm64
+
+      - name: Build for macOS (amd64)
+        run: CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-w -s" -o summer-darwin-amd64
+
+      - name: Build for macOS (arm64)
+        run: CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-w -s" -o summer-darwin-arm64
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          files: |
+            summer-linux-amd64
+            summer-linux-arm64
+            summer-darwin-amd64
+            summer-darwin-arm64
+          generate_release_notes: true
