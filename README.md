@@ -17,6 +17,11 @@ Summer CLI provides a frictionless way to scaffold and manage Summer projects, b
 curl -fsSL https://raw.githubusercontent.com/DropGuard/summer-cli/main/install.sh | bash
 ```
 
+```powershell
+# Windows (Run as Administrator)
+Invoke-WebRequest -Uri "https://github.com/DropGuard/summer-cli/releases/latest/download/summer-windows-amd64.exe" -OutFile "$env:SystemRoot\system32\summer.exe"
+```
+
 ## Commands
 
 ### `summer create <project-name>`
