@@ -47,6 +47,9 @@ func Generate(opts ProjectOptions) error {
 		if strings.HasPrefix(targetPath, "src/main/java/") {
 			fileRel := strings.TrimPrefix(targetPath, "src/main/java/")
 			targetPath = filepath.Join("src/main/java", packagePath, fileRel)
+		} else if strings.HasPrefix(targetPath, "src/test/java/") {
+			fileRel := strings.TrimPrefix(targetPath, "src/test/java/")
+			targetPath = filepath.Join("src/test/java", packagePath, fileRel)
 		}
 
 		// Prepend the project name (the root output dir)

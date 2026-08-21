@@ -10,7 +10,7 @@ import com.github.dropguard.summer.web.annotation.RestController;
 public class HelloController {
 
     @Get("/hello")
-    public String hello() {
-        return "hello from Summer";
+    public void hello(com.github.dropguard.summer.web.HttpContext ctx) {
+        ctx.ok(java.util.Map.of("message", "hello from Summer"));
     }
 }
