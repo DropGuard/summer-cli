@@ -55,5 +55,5 @@ func init() {
 	createCmd.Flags().StringVarP(&groupId, "group-id", "g", "com.example", "Maven groupId")
 	createCmd.Flags().StringVarP(&artifactId, "artifact-id", "a", "", "Maven artifactId (defaults to projectName)")
 	createCmd.Flags().StringVarP(&pkgName, "package", "p", "", "Base package (defaults to groupId.artifactId)")
-	createCmd.Flags().StringVarP(&frameworkVersion, "framework-version", "f", "0.1.0", "Summer Framework version to use")
+	createCmd.Flags().StringVarP(&frameworkVersion, "framework-version", "f", "0.3.1", "Summer Framework version to use")
 }
