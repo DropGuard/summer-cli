@@ -18,8 +18,8 @@ curl -fsSL https://raw.githubusercontent.com/DropGuard/summer-cli/main/install.s
 ```
 
 ```powershell
-# Windows (Run as Administrator)
-Invoke-WebRequest -Uri "https://github.com/DropGuard/summer-cli/releases/latest/download/summer-windows-amd64.exe" -OutFile "$env:SystemRoot\system32\summer.exe"
+# Windows (PowerShell)
+irm https://raw.githubusercontent.com/DropGuard/summer-cli/main/install.ps1 | iex
 ```
 
 ### Uninstallation
@@ -29,8 +29,8 @@ Because Summer CLI is a clean, single-file binary without any hidden background 
 sudo rm /usr/local/bin/summer
 ```
 ```powershell
-# Windows (Run as Administrator)
-Remove-Item "$env:SystemRoot\system32\summer.exe"
+# Windows (PowerShell)
+Remove-Item "$env:LOCALAPPDATA\Programs\summer" -Recurse -Force
 ```
 
 ## Commands
