@@ -14,29 +14,31 @@ func checkMaven() error {
 	return nil
 }
 
-func RunDev() error {
+func RunDev(extraArgs ...string) error {
 	if err := checkMaven(); err != nil {
 		return err
 	}
-	
-	cmd := exec.Command("mvn", "summer:dev")
+
+	args := append([]string{"summer:dev"}, extraArgs...)
+	cmd := exec.Command("mvn", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	
+
 	fmt.Println("🚀 Starting Summer Framework in Dev Mode...")
 	return cmd.Run()
 }
 
-func RunBuild() error {
+func RunBuild(extraArgs ...string) error {
 	if err := checkMaven(); err != nil {
 		return err
 	}
-	
-	cmd := exec.Command("mvn", "clean", "package")
+
+	args := append([]string{"clean", "package"}, extraArgs...)
+	cmd := exec.Command("mvn", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	
+
 	fmt.Println("📦 Building Summer application...")
 	return cmd.Run()
 }

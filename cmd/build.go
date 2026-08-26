@@ -11,8 +11,9 @@ import (
 var buildCmd = &cobra.Command{
 	Use:   "build",
 	Short: "Compile and package the application into a JAR",
+	Args:  cobra.ArbitraryArgs,
 	Run: func(cmd *cobra.Command, args []string) {
-		if err := runner.RunBuild(); err != nil {
+		if err := runner.RunBuild(args...); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ Build failed: %v\n", err)
 			os.Exit(1)
 		}
