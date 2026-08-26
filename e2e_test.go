@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/dropguard/summer-cli/cmd"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -21,9 +22,14 @@ func TestCLI_E2E(t *testing.T) {
 
 	// 2. Setup a temporary directory for the generated project
 	testWorkspace := t.TempDir()
-	
+
 	// 3. Run `summer create`
-	createCmd := exec.Command(binaryPath, "create", "e2e-app", "--group-id", "com.e2e", "--package", "com.e2e.app")
+	frameworkVersion := os.Getenv("SUMMER_E2E_FRAMEWORK_VERSION")
+	if frameworkVersion == "" {
+		frameworkVersion = cmd.FrameworkVersion // the version this CLI build pins by default
+	}
+	createCmd := exec.Command(binaryPath, "create", "e2e-app", "--group-id", "com.e2e",
+		"--package", "com.e2e.app", "--framework-version", frameworkVersion)
 	createCmd.Dir = testWorkspace
 	createCmd.Stdout = os.Stdout
 	createCmd.Stderr = os.Stderr
@@ -57,7 +63,7 @@ func TestCLI_E2E(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to read target directory: %v", err)
 	}
-	
+
 	foundJar := false
 	for _, entry := range entries {
 		if filepath.Ext(entry.Name()) == ".jar" {
