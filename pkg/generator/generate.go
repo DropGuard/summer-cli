@@ -21,7 +21,19 @@ type ProjectOptions struct {
 
 // Generate extracts the embedded archetype fs and applies template replacements
 func Generate(opts ProjectOptions) error {
-	// 1. Create the project root directory
+	if err := ValidatePackage(opts.Package); err != nil {
+		return err
+	}
+
+	// 1. Create the project root directory — refusing to touch an existing, non-empty one.
+	//    os.MkdirAll alone succeeds silently and the walk below would overwrite files in place.
+	if entries, err := os.ReadDir(opts.Name); err == nil {
+		if len(entries) > 0 {
+			return fmt.Errorf("directory %q already exists and is not empty; remove it or choose another name", opts.Name)
+		}
+	} else if !os.IsNotExist(err) {
+		return fmt.Errorf("failed to inspect target directory: %w", err)
+	}
 	if err := os.MkdirAll(opts.Name, 0755); err != nil {
 		return fmt.Errorf("failed to create project directory: %w", err)
 	}

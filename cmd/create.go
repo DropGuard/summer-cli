@@ -9,9 +9,9 @@ import (
 )
 
 var (
-	groupId    string
-	artifactId string
-	pkgName    string
+	groupId          string
+	artifactId       string
+	pkgName          string
 	frameworkVersion string
 )
 
@@ -25,8 +25,18 @@ var createCmd = &cobra.Command{
 		if artifactId == "" {
 			artifactId = projectName
 		}
+		if err := generator.ValidateGroupId(groupId); err != nil {
+			fmt.Fprintf(os.Stderr, "\u274c %v\n", err)
+			os.Exit(1)
+		}
 		if pkgName == "" {
-			pkgName = fmt.Sprintf("%s.%s", groupId, artifactId)
+			// Derived segments are sanitized ("my-app" -> "myapp") so the scaffold compiles;
+			// explicit -p values are validated as-is below.
+			pkgName = fmt.Sprintf("%s.%s", groupId, generator.SanitizePackageSegment(artifactId))
+		}
+		if err := generator.ValidatePackage(pkgName); err != nil {
+			fmt.Fprintf(os.Stderr, "\u274c %v\n", err)
+			os.Exit(1)
 		}
 
 		opts := generator.ProjectOptions{
@@ -55,5 +65,5 @@ func init() {
 	createCmd.Flags().StringVarP(&groupId, "group-id", "g", "com.example", "Maven groupId")
 	createCmd.Flags().StringVarP(&artifactId, "artifact-id", "a", "", "Maven artifactId (defaults to projectName)")
 	createCmd.Flags().StringVarP(&pkgName, "package", "p", "", "Base package (defaults to groupId.artifactId)")
-	createCmd.Flags().StringVarP(&frameworkVersion, "framework-version", "f", "0.3.1", "Summer Framework version to use")
+	createCmd.Flags().StringVarP(&frameworkVersion, "framework-version", "f", FrameworkVersion, "Summer Framework version to use (defaults to the CLI release)")
 }
