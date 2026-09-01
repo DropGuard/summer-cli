@@ -7,7 +7,7 @@ Summer CLI provides a frictionless way to scaffold and manage Summer projects, b
 ## Features
 
 - **Blazing Fast Scaffolding**: Embeds the Summer archetype directly in the binary. `summer create` works in under 0.1 seconds, completely offline.
-- **Modern Developer Experience**: Wraps Maven execution (`summer dev`, `summer build`) for cleaner workflows.
+- **Modern Developer Experience**: Wraps Maven execution (`summer dev`, `summer check`, `summer build`) for cleaner workflows.
 - **Zero Configuration**: No need to fiddle with `settings.xml` or GitHub Packages tokens just to try the framework.
 
 ## Installation
@@ -45,19 +45,48 @@ summer create my-app --group-id com.example --package com.example.app
 
 ### `summer dev`
 
-Start the application in development mode with Jandex indexing and hot-reload. (Wraps `mvn summer:dev`).
+Start the application in development mode with Jandex indexing and hot-reload. (Wraps `mvn summer:dev`). Maven arguments are passed through.
 
 ```bash
 cd my-app
 summer dev
+# for example: summer dev -Dsummer.engine=runtime
+```
+
+### `summer check`
+
+Run compilation, Jandex discovery, dependency resolution, and AOT wiring without packaging a JAR. It starts clean by default, so the result is not affected by stale output.
+
+```bash
+summer check
+summer check -DskipTests
+```
+
+Use `--incremental` only after a successful normal build has created the incremental source state:
+
+```bash
+summer check --incremental
 ```
 
 ### `summer build`
 
-Compile, test, and package the application into a production-ready Uber JAR using the AOT engine. (Wraps `mvn clean package`).
+Compile, test, and package the application into a production-ready Uber JAR using the AOT engine. The safe default wraps `mvn clean package` and removes all previous output.
 
 ```bash
 summer build
+```
+
+For a faster, state-checked build that reuses `target/`:
+
+```bash
+summer build --incremental
+```
+
+`--clean` is accepted as an explicit spelling of the default safe mode. All other arguments are passed to Maven:
+
+```bash
+summer build --clean -DskipTests
+summer build --incremental -DskipTests
 ```
 
 ## Architecture

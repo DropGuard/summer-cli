@@ -1,7 +1,5 @@
 package cmd
 
-// FrameworkVersion is the Summer Framework version new projects default to.
-// Injected at release build time alongside the CLI version so a CLI release never
-// pins users to a stale framework line by accident; overridable per-create via
-// --framework-version.
-var FrameworkVersion = "0.3.2"
+// FrameworkVersion is the fallback Summer Framework version new projects default to
+// when offline or when Maven Central cannot be reached.
+var FrameworkVersion = "0.3.3"
