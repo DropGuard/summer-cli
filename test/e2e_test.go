@@ -1,11 +1,12 @@
-package main
+package test
 
 import (
-	"github.com/dropguard/summer-cli/cmd"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"testing"
+
+	"github.com/dropguard/summer-cli/cmd"
 )
 
 // TestCLI_E2E builds the summer-cli binary and executes it against a temporary directory,
@@ -13,7 +14,7 @@ import (
 func TestCLI_E2E(t *testing.T) {
 	// 1. Build the binary
 	binaryPath := filepath.Join(t.TempDir(), "summer_test_bin")
-	buildCmd := exec.Command("go", "build", "-buildvcs=false", "-o", binaryPath)
+	buildCmd := exec.Command("go", "build", "-buildvcs=false", "-o", binaryPath, "github.com/dropguard/summer-cli")
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
 	if err := buildCmd.Run(); err != nil {

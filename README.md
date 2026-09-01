@@ -14,12 +14,12 @@ Summer CLI provides a frictionless way to scaffold and manage Summer projects, b
 
 ```bash
 # macOS / Linux
-curl -fsSL https://raw.githubusercontent.com/DropGuard/summer-cli/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/DropGuard/summer-cli/main/scripts/install.sh | bash
 ```
 
 ```powershell
 # Windows (PowerShell)
-irm https://raw.githubusercontent.com/DropGuard/summer-cli/main/install.ps1 | iex
+irm https://raw.githubusercontent.com/DropGuard/summer-cli/main/scripts/install.ps1 | iex
 ```
 
 ### Uninstallation
