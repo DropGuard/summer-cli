@@ -75,3 +75,42 @@ func ValidatePackage(pkg string) error {
 	}
 	return nil
 }
+
+// ValidateProjectName checks the scaffold target name. It becomes a directory
+// in the current working directory AND part of Maven coordinates, so path
+// separators (traversal like "../evil"), whitespace and shell-hostile
+// characters are rejected up front. A name that sanitizes to no legal package
+// segment (e.g. "123") is rejected with a pointer to the explicit -p flag.
+func ValidateProjectName(name string) error {
+	if name == "" {
+		return fmt.Errorf("project name must not be empty")
+	}
+	if name == "." || name == ".." {
+		return fmt.Errorf("project name %q is not a usable directory name", name)
+	}
+	if strings.ContainsAny(name, "/\\") {
+		return fmt.Errorf("project name %q must not contain path separators — it is created as a directory inside the current one", name)
+	}
+	for _, r := range name {
+		if !unicode.IsLetter(r) && !unicode.IsDigit(r) && r != '-' && r != '_' && r != '.' {
+			return fmt.Errorf("project name %q contains unsupported character %q (allowed: letters, digits, '-', '_', '.')", name, string(r))
+		}
+	}
+	if !IsJavaIdentifier(SanitizePackageSegment(name)) {
+		return fmt.Errorf("project name %q cannot derive a package segment — pass an explicit one with -p", name)
+	}
+	return nil
+}
+
+// ValidateArtifactId checks the Maven artifactId: no whitespace or path
+// separators (it is interpolated into pom.xml and used as a directory name by
+// Maven itself).
+func ValidateArtifactId(artifactId string) error {
+	if artifactId == "" {
+		return fmt.Errorf("artifactId must not be empty")
+	}
+	if strings.ContainsAny(artifactId, " /\\\t\n") {
+		return fmt.Errorf("invalid artifactId %q: whitespace and path separators are not allowed", artifactId)
+	}
+	return nil
+}

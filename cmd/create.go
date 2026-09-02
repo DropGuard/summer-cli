@@ -17,6 +17,7 @@ var (
 	artifactId       string
 	pkgName          string
 	frameworkVersion string
+	offline          bool
 )
 
 type mavenMetadata struct {
@@ -62,8 +63,16 @@ var createCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		projectName := args[0]
 
+		if err := generator.ValidateProjectName(projectName); err != nil {
+			fmt.Fprintf(os.Stderr, "❌ %v\n", err)
+			os.Exit(1)
+		}
 		if artifactId == "" {
 			artifactId = projectName
+		}
+		if err := generator.ValidateArtifactId(artifactId); err != nil {
+			fmt.Fprintf(os.Stderr, "❌ %v\n", err)
+			os.Exit(1)
 		}
 		if err := generator.ValidateGroupId(groupId); err != nil {
 			fmt.Fprintf(os.Stderr, "❌ %v\n", err)
@@ -80,7 +89,7 @@ var createCmd = &cobra.Command{
 		}
 
 		resolvedVersion := frameworkVersion
-		if !cmd.Flags().Changed("framework-version") {
+		if !offline && !cmd.Flags().Changed("framework-version") {
 			resolvedVersion = fetchLatestFrameworkVersion(FrameworkVersion)
 		}
 
@@ -111,4 +120,5 @@ func init() {
 	createCmd.Flags().StringVarP(&artifactId, "artifact-id", "a", "", "Maven artifactId (defaults to projectName)")
 	createCmd.Flags().StringVarP(&pkgName, "package", "p", "", "Base package (defaults to groupId.artifactId)")
 	createCmd.Flags().StringVarP(&frameworkVersion, "framework-version", "f", FrameworkVersion, "Summer Framework version to use (defaults to latest Maven Central release)")
+	createCmd.Flags().BoolVar(&offline, "offline", false, "Skip the Maven Central latest-version lookup and use the bundled version")
 }

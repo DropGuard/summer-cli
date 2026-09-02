@@ -6,7 +6,7 @@ Summer CLI provides a frictionless way to scaffold and manage Summer projects, b
 
 ## Features
 
-- **Blazing Fast Scaffolding**: Embeds the Summer archetype directly in the binary. `summer create` works in under 0.1 seconds, completely offline.
+- **Blazing Fast Scaffolding**: Embeds the Summer archetype directly in the binary. `summer create` works in under 0.1 seconds and works offline — pass `--offline` (or an explicit `--framework-version`) to skip the Maven Central latest-version lookup.
 - **Modern Developer Experience**: Wraps Maven execution (`summer dev`, `summer check`, `summer build`) for cleaner workflows.
 - **Zero Configuration**: No need to fiddle with `settings.xml` or GitHub Packages tokens just to try the framework.
 

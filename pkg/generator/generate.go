@@ -27,6 +27,9 @@ func Generate(opts ProjectOptions) error {
 
 	// 1. Create the project root directory — refusing to touch an existing, non-empty one.
 	//    os.MkdirAll alone succeeds silently and the walk below would overwrite files in place.
+	// rootCreated tracks ownership for rollback: a failure mid-walk must not leave a
+	// half-written directory behind (the "non-empty" guard above would then block reruns).
+	rootCreated := false
 	if entries, err := os.ReadDir(opts.Name); err == nil {
 		if len(entries) > 0 {
 			return fmt.Errorf("directory %q already exists and is not empty; remove it or choose another name", opts.Name)
@@ -37,6 +40,7 @@ func Generate(opts ProjectOptions) error {
 	if err := os.MkdirAll(opts.Name, 0755); err != nil {
 		return fmt.Errorf("failed to create project directory: %w", err)
 	}
+	rootCreated = true
 
 	packagePath := strings.ReplaceAll(opts.Package, ".", "/")
 
@@ -96,6 +100,9 @@ func Generate(opts ProjectOptions) error {
 	})
 
 	if err != nil {
+		if rootCreated {
+			_ = os.RemoveAll(opts.Name)
+		}
 		return fmt.Errorf("failed to generate project: %w", err)
 	}
 
