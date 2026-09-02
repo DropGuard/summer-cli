@@ -12,18 +12,17 @@ var buildCmd = &cobra.Command{
 	Short: "Compile and package the application into a JAR",
 	Long: `Build a Summer application.
 
-The default build starts with a clean target to prevent stale generated code
-or bytecode from entering the artifact. Use --incremental only when you want
-Maven to reuse target/; use --clean explicitly to document the safe mode.
+The build always starts from a clean target so stale classes cannot enter the
+artifact. For incremental builds use Maven directly — the Summer Maven plugin
+reconciles stale classes on every run either way.
 
 All other arguments are passed to Maven, for example:
   summer build -DskipTests
-  summer build --incremental -DskipTests
 `,
 	DisableFlagParsing: true,
 	Args:               cobra.ArbitraryArgs,
 	RunE: func(cmd *cobra.Command, args []string) error {
-		options, mavenArgs, showHelp, err := parseBuildArgs(args)
+		mavenArgs, showHelp, err := parseBuildArgs(args)
 		if err != nil {
 			return err
 		}
@@ -31,7 +30,7 @@ All other arguments are passed to Maven, for example:
 			return cmd.Help()
 		}
 
-		if err := runner.RunBuildWithOptions(options, mavenArgs...); err != nil {
+		if err := runner.RunBuild(mavenArgs...); err != nil {
 			return fmt.Errorf("build failed: %w", err)
 		}
 		fmt.Fprintln(cmd.OutOrStdout(), "Build successful!")
@@ -45,27 +44,20 @@ func init() {
 
 // parseBuildArgs handles Summer-owned flags while leaving every other argument
 // untouched for Maven. Cobra's normal parser rejects Maven's -D... flags before
-// they can be forwarded, so build/dev commands deliberately use DisableFlagParsing.
-func parseBuildArgs(args []string) (runner.BuildOptions, []string, bool, error) {
-	var options runner.BuildOptions
+// they can be forwarded, so build/check commands deliberately use
+// DisableFlagParsing. The removed --incremental/--clean modes are rejected with
+// a migration hint instead of being silently forwarded to Maven (which would
+// fail with a cryptic "unknown lifecycle phase").
+func parseBuildArgs(args []string) ([]string, bool, error) {
 	var mavenArgs []string
-	cleanRequested := false
 	showHelp := false
 
 	for i, arg := range args {
 		switch arg {
-		case "--incremental":
-			if cleanRequested {
-				return runner.BuildOptions{}, nil, false,
-					fmt.Errorf("--incremental cannot be combined with --clean")
-			}
-			options.Incremental = true
-		case "--clean":
-			if options.Incremental {
-				return runner.BuildOptions{}, nil, false,
-					fmt.Errorf("--clean cannot be combined with --incremental")
-			}
-			cleanRequested = true
+		case "--incremental", "--clean":
+			return nil, false, fmt.Errorf(
+				"%s was removed: summer always builds from a clean target (stale-class reconciliation runs in the Maven plugin regardless); use plain 'mvn' for incremental builds",
+				arg)
 		case "--help", "-h":
 			if len(args) == 1 {
 				showHelp = true
@@ -74,11 +66,11 @@ func parseBuildArgs(args []string) (runner.BuildOptions, []string, bool, error) 
 			}
 		case "--":
 			mavenArgs = append(mavenArgs, args[i+1:]...)
-			return options, mavenArgs, showHelp, nil
+			return mavenArgs, showHelp, nil
 		default:
 			mavenArgs = append(mavenArgs, arg)
 		}
 	}
 
-	return options, mavenArgs, showHelp, nil
+	return mavenArgs, showHelp, nil
 }
