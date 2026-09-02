@@ -3,7 +3,8 @@ $ErrorActionPreference = 'Stop'
 Write-Host "Installing Summer CLI for Windows..." -ForegroundColor Cyan
 
 # Detect Architecture
-$Arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { "386" }
+# Only amd64 Windows binaries are published; fail loudly instead of 404ing.
+$Arch = if ([Environment]::Is64BitOperatingSystem) { "amd64" } else { throw "32-bit Windows is not supported by the Summer CLI." }
 if ($env:PROCESSOR_ARCHITECTURE -eq "ARM64") {
     $Arch = "arm64"
 }

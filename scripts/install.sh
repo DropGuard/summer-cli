@@ -54,7 +54,15 @@ if [ -z "$WANT" ]; then
     echo "Error: no checksum entry for $EXPECTED_NAME in SHA256SUMS."
     exit 1
 fi
-GOT=$(sha256sum "$TMP_FILE" | awk '{print $1}')
+# macOS ships shasum (default SHA-1 — force -a 256); GNU systems ship sha256sum.
+if command -v sha256sum >/dev/null 2>&1; then
+    GOT=$(sha256sum "$TMP_FILE" | awk '{print $1}')
+elif command -v shasum >/dev/null 2>&1; then
+    GOT=$(shasum -a 256 "$TMP_FILE" | awk '{print $1}')
+else
+    echo "Error: neither sha256sum nor shasum found; cannot verify checksum. Aborting install."
+    exit 1
+fi
 if [ "$GOT" != "$WANT" ]; then
     echo "Error: checksum mismatch (want $WANT, got $GOT). Aborting install."
     exit 1
