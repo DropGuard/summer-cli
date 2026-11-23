@@ -53,6 +53,8 @@ summer dev
 # for example: summer dev -Dsummer.engine=runtime
 ```
 
+On every restart and on exit, the application gets **2 seconds** to shut down gracefully before it is force-killed — dev mode deliberately does not wait for the app's `shutdown.timeout-ms` (10s by default, sized for production drains), so the edit-restart loop stays fast. Stopping `summer dev` (Ctrl+C) stops the whole tree: anything Maven started that is still running 5 seconds later is killed, on Unix and Windows alike.
+
 ### `summer check`
 
 Run compilation, Jandex discovery, dependency resolution, and AOT wiring without packaging a JAR. It starts clean by default, so the result is not affected by stale output.

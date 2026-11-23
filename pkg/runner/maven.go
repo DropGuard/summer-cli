@@ -23,6 +23,11 @@ func checkMaven() error {
 // settings.xml — a default installation fails with "No plugin found for
 // prefix 'summer'". The CLI spells out the coordinates so `summer dev` works
 // on a pristine machine; the length never reaches the user's command line.
+//
+// devStopTimeout bounds how long a stopped `summer dev` waits for Maven before
+// killing its process tree. Maven's own shutdown hook gives the application
+// JVM 2s (AppProcessManager.STOP_GRACE in summer-maven-plugin) to shut down
+// gracefully, so this must stay above that grace.
 const (
 	mavenDevGoal   = "io.github.dropguard:summer-maven-plugin:dev"
 	devStopTimeout = 5 * time.Second
