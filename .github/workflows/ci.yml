@@ -24,6 +24,13 @@ jobs:
         with:
           java-version: '25'
           distribution: 'temurin'
+          # The e2e test runs `summer build` on a scaffolded app, which resolves the framework
+          # and plugins into ~/.m2. Key on what decides those dependencies: the scaffold pom
+          # and the framework version this CLI pins.
+          cache: maven
+          cache-dependency-path: |
+            templates/scaffold/pom.xml
+            cmd/framework_version.go
 
       - name: Set up Go
         uses: actions/setup-go@v7
