@@ -23,16 +23,16 @@ func checkMaven() error {
 // settings.xml — a default installation fails with "No plugin found for
 // prefix 'summer'". The CLI spells out the coordinates so `summer dev` works
 // on a pristine machine; the length never reaches the user's command line.
-const mavenDevGoal = "io.github.dropguard:summer-maven-plugin:dev"
+const (
+	mavenDevGoal   = "io.github.dropguard:summer-maven-plugin:dev"
+	devStopTimeout = 5 * time.Second
+)
 
 func RunDev(extraArgs ...string) error {
 	if err := checkMaven(); err != nil {
 		return err
 	}
 
-	// dev is long-lived: the CLI's own SIGINT/SIGTERM must reach the Maven
-	// process group so a non-interactive kill (docker stop, CI timeout, kill
-	// from another terminal) does not orphan the JVM still holding port 8080.
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -41,18 +41,8 @@ func RunDev(extraArgs ...string) error {
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	cmd.Stdin = os.Stdin
-	setProcessGroup(cmd)
-	// Cancel sends the same signal to the whole group (not just the mvn child),
-	// then restores default signal behavior so a second Ctrl-C hard-kills.
-	cmd.Cancel = func() error {
-		stop()
-		return signalProcessGroup(cmd)
-	}
-	// Never hang forever on a stuck child that ignores SIGTERM.
-	cmd.WaitDelay = 5 * time.Second
-
 	fmt.Println("🚀 Starting Summer Framework in Dev Mode...")
-	return cmd.Run()
+	return runDevProcess(ctx, stop, cmd)
 }
 
 // RunBuild always starts from a clean target so stale classes cannot enter the

@@ -3,14 +3,21 @@
 package runner
 
 import (
+	"context"
 	"os/exec"
 	"syscall"
 )
 
-// setProcessGroup puts Maven into its own process group so a cancel signal can
+// runDevProcess puts Maven into its own process group so a cancel signal can
 // reach the whole tree (mvn spawns the application JVM as a child in dev mode).
-func setProcessGroup(cmd *exec.Cmd) {
+func runDevProcess(_ context.Context, stop context.CancelFunc, cmd *exec.Cmd) error {
 	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	cmd.Cancel = func() error {
+		stop()
+		return signalProcessGroup(cmd)
+	}
+	cmd.WaitDelay = devStopTimeout
+	return cmd.Run()
 }
 
 // signalProcessGroup signals Maven's process group with SIGTERM, the graceful
