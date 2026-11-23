@@ -4,6 +4,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"testing"
 
 	"github.com/dropguard/summer-cli/cmd"
@@ -13,7 +14,11 @@ import (
 // verifying the creation of the project and that `summer build` runs cleanly.
 func TestCLI_E2E(t *testing.T) {
 	// 1. Build the binary
-	binaryPath := filepath.Join(t.TempDir(), "summer_test_bin")
+	binaryName := "summer_test_bin"
+	if runtime.GOOS == "windows" {
+		binaryName += ".exe" // exec resolves only PATHEXT extensions on Windows
+	}
+	binaryPath := filepath.Join(t.TempDir(), binaryName)
 	buildCmd := exec.Command("go", "build", "-buildvcs=false", "-o", binaryPath, "github.com/dropguard/summer-cli")
 	buildCmd.Stdout = os.Stdout
 	buildCmd.Stderr = os.Stderr
